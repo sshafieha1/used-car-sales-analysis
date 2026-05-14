@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Analysis: California Used Car Market</title>
+    <meta name="description" content="A technical study on used car price depreciation in California using Random Forest regression.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-paper: #FDFBF0;
+            --primary-butternut: #D35400;
+            --accent-butternut: #E67E22;
+            --text-main: #2C3E50;
+            --text-muted: #566573;
+            --border-light: #F2E3D5;
+            --shadow-lg: 0 20px 50px rgba(211, 84, 0, 0.1);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-paper);
+            color: var(--text-main);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        nav#top-nav {
+            position: sticky;
+            top: 0;
+            background: rgba(253, 251, 240, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 20px 0;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        nav#top-nav ul {
+            display: inline-flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav#top-nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: var(--transition-smooth);
+        }
+
+        nav#top-nav a:hover {
+            color: var(--primary-butternut);
+            transform: translateY(-2px);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 24px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s forwards ease-out;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            margin-bottom: 80px;
+        }
+
+        h1 {
+            font-family: 'Zilla Slab', serif;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: var(--primary-butternut);
+            letter-spacing: -0.02em;
+        }
+
+        .author-info {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 60px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition-smooth);
+        }
+
+        .metrics-strip:hover {
+            transform: scale(1.02);
+        }
+
+        .metric-value {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-butternut);
+            font-family: 'Zilla Slab', serif;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        h2 {
+            font-family: 'Zilla Slab', serif;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: var(--primary-butternut);
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-butternut);
+            margin: 15px auto 0;
+            transition: var(--transition-smooth);
+        }
+
+        section:hover h2::after {
+            width: 100px;
+        }
+
+        p {
+            margin-bottom: 30px;
+            font-size: 1.15rem;
+            color: #4A5568;
+            max-width: 750px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .forecast-card {
+            background: white;
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 100px;
+            transition: var(--transition-smooth);
+            border: 1px solid var(--border-light);
+        }
+
+        .forecast-card img {
+            width: 100%;
+            border-radius: 18px;
+            margin-bottom: 30px;
+        }
+
+        /* SMOOTH EXPANDABLE SECTION (CSS Grid Hack) */
+        details {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-light);
+            transition: var(--transition-smooth);
+            text-align: left;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 25px 30px;
+            font-family: 'Zilla Slab', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-butternut);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        summary:hover {
+            background: #FFFDF5;
+        }
+
+        summary::after {
+            content: '↓';
+            font-size: 1.2rem;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        /* The Animation Container */
+        .details-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        details[open] .details-wrapper {
+            grid-template-rows: 1fr;
+        }
+
+        .details-content {
+            overflow: hidden;
+            padding: 0 30px;
+            transition: padding 0.5s;
+        }
+
+        details[open] .details-content {
+            padding-bottom: 30px;
+        }
+
+        /* Individual Plot Styling */
+        .plot-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 100px;
+            margin-top: 60px;
+        }
+
+        .plot-item {
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition-smooth);
+            border: 1px solid var(--border-light);
+        }
+
+        .plot-item:hover {
+            transform: translateY(-8px);
+        }
+
+        .plot-img-container {
+            padding: 20px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .plot-img-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            display: block;
+        }
+
+        .interpretation {
+            padding: 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 40px;
+            text-align: left;
+        }
+
+        .int-block h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--primary-butternut);
+            margin-bottom: 12px;
+            letter-spacing: 0.12em;
+            font-weight: 700;
+        }
+
+        .int-block p {
+            font-size: 1rem;
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        footer {
+            padding: 100px 24px;
+            background: white;
+            margin-top: 100px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        @media (max-width: 768px) {
+            nav#top-nav { display: none; }
+            h1 { font-size: 2.5rem; }
+            .interpretation { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="top-nav">
+        <ul>
+            <li><a href="#metrics">Summary</a></li>
+            <li><a href="#forecast">Forecast</a></li>
+            <li><a href="#methodology">Process</a></li>
+            <li><a href="#eda">Analysis</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>Predicting Vehicle Prices in the California Market</h1>
+            <div class="author-info">A study by Sahand Shafieha</div>
+        </header>
+
+        <section id="metrics">
+            <h2>The Big Picture</h2>
+            <p>We analyzed over 3,800 vehicle listings to understand how mileage and time influence price. Our model predicts valuation with high precision across all affordability segments.</p>
+            <div class="metrics-strip">
+                <div class="metric-item">
+                    <span class="metric-value">0.694</span>
+                    <span class="metric-label">Accuracy Score</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">$10,616</span>
+                    <span class="metric-label">Mean Error</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">3.8k+</span>
+                    <span class="metric-label">Data Points</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">90 Days</span>
+                    <span class="metric-label">Forecast</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="forecast">
+            <h2>Future Price Forecast</h2>
+            <div class="forecast-card">
+                <img src="future_forecast.png" alt="Price Projection">
+                <div class="interpretation">
+                    <div class="int-block">
+                        <h4>Interpretation</h4>
+                        <p>Visualizes projected market value decay for Affordable, Mid-Range, and Luxury tiers over 90 days.</p>
+                    </div>
+                    <div class="int-block">
+                        <h4>Strategy</h4>
+                        <p>Assists sellers in timing their listings based on predicted mileage accumulation (40mi/day).</p>
+                    </div>
+                    <div class="int-block">
+                        <h4>Impact</h4>
+                        <p>Provides a data-driven look at the cost of ownership over a standard three-month period.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="methodology">
+            <h2>The Science Behind It</h2>
+            
+            <!-- CLEANING & IMPUTATION -->
+            <details>
+                <summary>Cleaning & Imputation</summary>
+                <div class="details-wrapper">
+                    <div class="details-content">
+                        <p>Missing data is a common artifact of API scraping. We used <strong>K-Nearest Neighbors (KNN) Imputation</strong> to fill in gaps for mileage and price. By comparing similar vehicles, we ensured our dataset remained robust without losing valuable rows of data.</p>
+                    </div>
+                </div>
+            </details>
+
+            <!-- MARKET STRATIFICATION -->
+            <details>
+                <summary>Market Stratification</summary>
+                <div class="details-wrapper">
+                    <div class="details-content">
+                        <p>Cars aren't all the same. We split the data into <strong>Affordable</strong>, <strong>Mid-Range</strong>, and <strong>Luxury</strong> tiers to better understand how different classes of vehicles depreciate.</p>
+                    </div>
+                </div>
+            </details>
+
+            <!-- RANDOM FOREST ENGINE -->
+            <details>
+                <summary>Random Forest Engine</summary>
+                <div class="details-wrapper">
+                    <div class="details-content">
+                        <p>Our predictions are powered by a <strong>Random Forest Regressor</strong>. It looks at hundreds of decision trees to find the most accurate price based on mileage and market demand.</p>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section id="eda">
+            <h2>Market Insights</h2>
+            <div class="plot-grid">
+                
+                <!-- PLOT 1: Price vs Mileage -->
+                <div class="plot-item">
+                    <div class="plot-img-container">
+                        <img src="eda_plot1.png" alt="Price vs Mileage by Tier">
+                    </div>
+                    <div class="interpretation">
+                        <div class="int-block">
+                            <h4>The Correlation</h4>
+                            <p>This plot illustrates the inverse relationship between mileage and price. As mileage increases, the value drops—but at varying rates per tier.</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Tiered Decay</h4>
+                            <p>Luxury vehicles (Green) show a much steeper depreciation slope, while Affordable models (Red) retain a higher percentage of value per mile.</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Model Use</h4>
+                            <p>Confirmed mileage as the strongest predictor of price, forming the core interaction term in our Random Forest model.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PLOT 2: Price Trends Over Time -->
+                <div class="plot-item">
+                    <div class="plot-img-container">
+                        <img src="eda_plot2.png" alt="Price Trends Over Time">
+                    </div>
+                    <div class="interpretation">
+                        <div class="int-block">
+                            <h4>Temporal Shifts</h4>
+                            <p>Tracks the average list price over the past 90 days. It reveals market volatility and seasonal fluctuations in the CA market.</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Market Health</h4>
+                            <p>The stability of the lines suggests a balanced supply-demand ratio, with no sudden market crashes detected in the period.</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Predictive Gain</h4>
+                            <p>Adding time-based variables helped the model capture broad market "drift," accounting for inflation or seasonal demand spikes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PLOT 3: Price vs Days on Market -->
+                <div class="plot-item">
+                    <div class="plot-img-container">
+                        <img src="eda_plot3.png" alt="Price vs Days on Market">
+                    </div>
+                    <div class="interpretation">
+                        <div class="int-block">
+                            <h4>Inventory Stality</h4>
+                            <p>Analyzes if "stale" inventory (high Days on Market) leads to price drops. There is a visible downward pressure as cars sit longer.</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Negotiation Proxy</h4>
+                            <p>High DOM values often signal a motivated seller, providing a proxy for potential discount levels in the market.</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Accuracy Contribution</h4>
+                            <p>Including DOM improved our R-Squared by capturing the "desperation" or "desirability" factor of specific listings.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PLOT 4: Price Distribution by Tier -->
+                <div class="plot-item">
+                    <div class="plot-img-container">
+                        <img src="eda_plot4.png" alt="Price Distribution by Tier">
+                    </div>
+                    <div class="interpretation">
+                        <div class="int-block">
+                            <h4>Segment Variance</h4>
+                            <p>A boxplot showing the spread of prices within our three categories. It validates our tier thresholds (<$30k, $30k-$45k, >$45k).</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Outlier Detection</h4>
+                            <p>Identifies luxury outliers that exceed $100k, ensuring our model handles extreme values without skewing the median prediction.</p>
+                        </div>
+                        <div class="int-block">
+                            <h4>Feature Validation</h4>
+                            <p>Confirms that the 'Tier' category successfully separates the data into distinct, non-overlapping price regimes.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section>
+            <h2>Final Summary</h2>
+            <p>Our analysis provides a clear window into the California used car market. By combining age, mileage, and market demand into a single predictive model, we help consumers make smarter buying and selling decisions.</p>
+        </section>
+
+        <footer>
+            <p>A technical showcase by Sahand Shafieha.</p>
+            <p>&copy; 2026 Vehicle Trends Report. Built with R & modern web standards.</p>
+        </footer>
+    </main>
+
+</body>
+</html>
