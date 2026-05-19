@@ -13,12 +13,12 @@
     <style>
         :root {
             --bg-paper: #FDFBF0;
-            --primary-butternut: #D35400;
-            --accent-butternut: #E67E22;
+            --primary-butternut: #111111; /* Rich premium dark charcoal/black */
+            --accent-butternut: #2C3E50;  /* Sophisticated slate gray */
             --text-main: #2C3E50;
             --text-muted: #566573;
-            --border-light: #F2E3D5;
-            --shadow-lg: 0 20px 50px rgba(211, 84, 0, 0.1);
+            --border-light: #E8E6D9;      /* Neutral cream-border */
+            --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.05); /* Clean neutral shadow */
             --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -105,35 +105,100 @@
             font-weight: 400;
         }
 
-        .metrics-strip {
+        .metrics-overview {
+            margin: 60px auto;
+        }
+
+        .tier-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .tier-table thead tr {
+            background: var(--primary-butternut);
+            color: white;
+        }
+
+        .tier-table th {
+            padding: 18px 22px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.78rem;
+        }
+
+        .tier-table td {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-main);
+        }
+
+        .tier-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tier-table tbody tr:hover {
+            background: #FDFBF0;
+        }
+
+        .tier-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .tier-badge {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-good  { color: #27AE60; font-weight: 600; }
+        .stat-mid   { color: #E67E22; font-weight: 600; }
+        .stat-warn  { color: #E74C3C; font-weight: 600; }
+
+        .metrics-summary-strip {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
-            margin: 60px auto;
-            padding: 40px;
+            margin-top: 24px;
+        }
+
+        .summary-card {
             background: white;
-            border-radius: 20px;
+            border-radius: 16px;
+            padding: 28px 24px;
             box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            text-align: center;
             transition: var(--transition-smooth);
         }
 
-        .metrics-strip:hover {
-            transform: scale(1.02);
-        }
+        .summary-card:hover { transform: translateY(-4px); }
 
         .metric-value {
             display: block;
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--primary-butternut);
             font-family: 'Zilla Slab', serif;
         }
 
         .metric-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.15em;
+            margin-top: 6px;
+            display: block;
         }
 
         h2 {
@@ -303,10 +368,40 @@
         }
 
         footer {
-            padding: 100px 24px;
+            padding: 40px 24px;
             background: white;
-            margin-top: 100px;
+            margin-top: 60px;
             border-top: 1px solid var(--border-light);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        footer p {
+            margin-bottom: 12px;
+            max-width: 100%;
+            line-height: 1.6;
+        }
+
+        footer code {
+            font-family: monospace;
+            background: #F5F5F3;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #333;
+        }
+
+        .footer-author {
+            font-weight: 600;
+            color: var(--primary-butternut);
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+
+        .footer-copy {
+            margin-top: 24px;
+            font-size: 0.75rem;
+            opacity: 0.8;
         }
 
         @media (max-width: 768px) {
@@ -330,28 +425,78 @@
     <main>
         <header>
             <h1>Predicting Vehicle Prices in the California Market</h1>
-            <div class="author-info">A study by Sahand Shafieha</div>
+            <div class="author-info">A statistical Machine Learning Study by Sahand Shafieha</div>
         </header>
 
         <section id="metrics">
             <h2>The Big Picture</h2>
-            <p>We analyzed over 3,800 vehicle listings to understand how mileage and time influence price. Our model predicts valuation with high precision across all affordability segments.</p>
-            <div class="metrics-strip">
-                <div class="metric-item">
-                    <span class="metric-value">0.694</span>
-                    <span class="metric-label">Accuracy Score</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-value">$10,616</span>
-                    <span class="metric-label">Mean Error</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-value">3.8k+</span>
-                    <span class="metric-label">Data Points</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-value">90 Days</span>
-                    <span class="metric-label">Forecast</span>
+            <p>We trained four independent Random Forest models — one per market tier — on 3,800 California used car listings. Each model was evaluated on a held-out test set using RMSE, MAE, MAPE, and R².</p>
+
+            <div class="metrics-overview">
+                <table class="tier-table">
+                    <thead>
+                        <tr>
+                            <th>Tier</th>
+                            <th>Price Range</th>
+                            <th>RMSE</th>
+                            <th>MAE</th>
+                            <th>MAPE</th>
+                            <th>R²</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="tier-badge"><span class="tier-dot" style="background:#E74C3C"></span>Budget</span></td>
+                            <td>Under $15,000</td>
+                            <td class="stat-good">$2,381</td>
+                            <td class="stat-good">$1,978</td>
+                            <td class="stat-mid">19.2%</td>
+                            <td class="stat-warn">0.274</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tier-badge"><span class="tier-dot" style="background:#E67E22"></span>Affordable</span></td>
+                            <td>$15,000 – $30,000</td>
+                            <td class="stat-good">$3,078</td>
+                            <td class="stat-good">$2,400</td>
+                            <td class="stat-good">10.4%</td>
+                            <td class="stat-mid">0.368</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tier-badge"><span class="tier-dot" style="background:#3498DB"></span>Mid-Range</span></td>
+                            <td>$30,000 – $50,000</td>
+                            <td class="stat-mid">$5,372</td>
+                            <td class="stat-mid">$4,398</td>
+                            <td class="stat-mid">11.5%</td>
+                            <td class="stat-warn">0.073</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tier-badge"><span class="tier-dot" style="background:#2ECC71"></span>Premium</span></td>
+                            <td>$50,000 – $100,000</td>
+                            <td class="stat-warn">$11,808</td>
+                            <td class="stat-warn">$9,409</td>
+                            <td class="stat-mid">13.8%</td>
+                            <td class="stat-warn">0.096</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="metrics-summary-strip">
+                    <div class="summary-card">
+                        <span class="metric-value">3,800+</span>
+                        <span class="metric-label">Data Points</span>
+                    </div>
+                    <div class="summary-card">
+                        <span class="metric-value">4</span>
+                        <span class="metric-label">Independent Models</span>
+                    </div>
+                    <div class="summary-card">
+                        <span class="metric-value">10.4%</span>
+                        <span class="metric-label">Best MAPE (Affordable)</span>
+                    </div>
+                    <div class="summary-card">
+                        <span class="metric-value">90 Days</span>
+                        <span class="metric-label">Forecast Horizon</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -359,19 +504,13 @@
         <section id="forecast">
             <h2>Future Price Forecast</h2>
             <div class="forecast-card">
-                <img src="future_forecast.png" alt="Price Projection">
+                <div style="position: relative; height:400px; width:100%; margin-bottom:30px;">
+                    <canvas id="forecastChart"></canvas>
+                </div>
                 <div class="interpretation">
                     <div class="int-block">
-                        <h4>Interpretation</h4>
-                        <p>Visualizes projected market value decay for Affordable, Mid-Range, and Luxury tiers over 90 days.</p>
-                    </div>
-                    <div class="int-block">
-                        <h4>Strategy</h4>
-                        <p>Assists sellers in timing their listings based on predicted mileage accumulation (40mi/day).</p>
-                    </div>
-                    <div class="int-block">
-                        <h4>Impact</h4>
-                        <p>Provides a data-driven look at the cost of ownership over a standard three-month period.</p>
+                        <h4>Analysis & Insights</h4>
+                        <p>This interactive forecast projects the 90-day market value decay for Affordable, Mid-Range, and Luxury tiers. It was obtained by passing simulated vehicle attributes (accumulating 40 miles/day) into our trained Random Forest Regressor. This contributed to our study by providing clear, category-specific depreciation schedules, giving buyers and sellers a concrete, data-driven tool to time transactions and evaluate total ownership costs over a 3-month horizon.</p>
                     </div>
                 </div>
             </div>
@@ -422,16 +561,8 @@
                     </div>
                     <div class="interpretation">
                         <div class="int-block">
-                            <h4>The Correlation</h4>
-                            <p>This plot illustrates the inverse relationship between mileage and price. As mileage increases, the value drops—but at varying rates per tier.</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Tiered Decay</h4>
-                            <p>Luxury vehicles (Green) show a much steeper depreciation slope, while Affordable models (Red) retain a higher percentage of value per mile.</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Model Use</h4>
-                            <p>Confirmed mileage as the strongest predictor of price, forming the core interaction term in our Random Forest model.</p>
+                            <h4>Analysis & Insights</h4>
+                            <p>This plot illustrates the strong inverse relationship between mileage and listing price. It was obtained by mapping actual vehicle odometer readings against listing prices, grouped by affordability tier and fitted with linear regression trendlines. This contributed to our study by confirming mileage as the single most powerful individual predictor of vehicle depreciation, justifying its use as the core feature in our Random Forest regression model.</p>
                         </div>
                     </div>
                 </div>
@@ -443,16 +574,8 @@
                     </div>
                     <div class="interpretation">
                         <div class="int-block">
-                            <h4>Temporal Shifts</h4>
-                            <p>Tracks the average list price over the past 90 days. It reveals market volatility and seasonal fluctuations in the CA market.</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Market Health</h4>
-                            <p>The stability of the lines suggests a balanced supply-demand ratio, with no sudden market crashes detected in the period.</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Predictive Gain</h4>
-                            <p>Adding time-based variables helped the model capture broad market "drift," accounting for inflation or seasonal demand spikes.</p>
+                            <h4>Analysis & Insights</h4>
+                            <p>This timeline tracks how average used car listing prices fluctuated day-to-day. It was obtained by grouping historical listing prices by their last seen date and computing a LOESS smoothed trendline for each affordability tier. This contributed to our study by demonstrating overall market stability during our data collection window, ensuring our baseline forecast wasn't skewed by sudden, highly volatile external market shocks.</p>
                         </div>
                     </div>
                 </div>
@@ -464,16 +587,8 @@
                     </div>
                     <div class="interpretation">
                         <div class="int-block">
-                            <h4>Inventory Stality</h4>
-                            <p>Analyzes if "stale" inventory (high Days on Market) leads to price drops. There is a visible downward pressure as cars sit longer.</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Negotiation Proxy</h4>
-                            <p>High DOM values often signal a motivated seller, providing a proxy for potential discount levels in the market.</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Accuracy Contribution</h4>
-                            <p>Including DOM improved our R-Squared by capturing the "desperation" or "desirability" factor of specific listings.</p>
+                            <h4>Analysis & Insights</h4>
+                            <p>This scatter plot examines the relationship between price levels and inventory listing duration. It was obtained by plotting active vehicle prices against their total Days on Market (DOM), fitted with linear trendlines. This contributed to our study by revealing a distinct downward price pressure as cars sit longer, acting as a crucial proxy for seller motivation that increased our model's final predictive precision.</p>
                         </div>
                     </div>
                 </div>
@@ -485,16 +600,8 @@
                     </div>
                     <div class="interpretation">
                         <div class="int-block">
-                            <h4>Segment Variance</h4>
-                            <p>A boxplot showing the spread of prices within our three categories. It validates our tier thresholds (<$30k, $30k-$45k, >$45k).</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Outlier Detection</h4>
-                            <p>Identifies luxury outliers that exceed $100k, ensuring our model handles extreme values without skewing the median prediction.</p>
-                        </div>
-                        <div class="int-block">
-                            <h4>Feature Validation</h4>
-                            <p>Confirms that the 'Tier' category successfully separates the data into distinct, non-overlapping price regimes.</p>
+                            <h4>Analysis & Insights</h4>
+                            <p>This boxplot illustrates the overall price range, spread, and median for our three vehicle affordability segments. It was obtained by calculating the five-number summary (minimum, first quartile, median, third quartile, maximum) of listing prices grouped by affordability tier. This contributed to our study by validating our tier boundary selections ($30k and $45k) and confirming that our categorization successfully captured separate, non-overlapping price regimes.</p>
                         </div>
                     </div>
                 </div>
@@ -508,10 +615,141 @@
         </section>
 
         <footer>
-            <p>A technical showcase by Sahand Shafieha.</p>
-            <p>&copy; 2026 Vehicle Trends Report. Built with R & modern web standards.</p>
+            <p class="footer-author">A statistical Machine Learning Study by Sahand Shafieha</p>
+            <p>
+                Historical market listing data provided by the <strong>MarketCheck API</strong>. 
+                Vehicle specifications dynamically decoded via the public <strong>NHTSA VIN Decoder API</strong>.
+            </p>
+            <p>
+                Analyses powered by R (<code>tidyverse</code>, <code>tidymodels</code>, <code>ranger</code>, <code>httr</code>, <code>jsonlite</code>, <code>ggplot2</code>) & Web Technologies (<code>Chart.js</code>, <code>PapaParse</code>).
+            </p>
+            <p class="footer-copy">&copy; 2026 Vehicle Trends Report. All rights reserved.</p>
         </footer>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Papa.parse('car_sales_predictions_90days.csv', {
+                download: true,
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    
+                    const datasets = {};
+                    const colors = {
+                        'Budget':     '#E74C3C',
+                        'Affordable': '#E67E22',
+                        'Mid-Range':  '#3498DB',
+                        'Premium':    '#2ECC71'
+                    };
+
+                    data.forEach(row => {
+                        const tier = row.tier;          // ← updated: was row.affordability_tier
+                        const pred = row['.pred'];
+                        if (!tier || pred === undefined || pred === null) return;
+                        
+                        if (!datasets[tier]) {
+                            datasets[tier] = {
+                                label: tier,
+                                data: [],
+                                borderColor: colors[tier] || '#95A5A6',
+                                backgroundColor: colors[tier] || '#95A5A6',
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 6,
+                                borderWidth: 3
+                            };
+                        }
+                        
+                        datasets[tier].data.push({
+                            x: row.date,
+                            y: parseFloat(pred)         // ensure numeric
+                        });
+                    });
+
+                    const ctx = document.getElementById('forecastChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            datasets: Object.values(datasets)
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed.y !== null) {
+                                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        font: {
+                                            family: "'Outfit', sans-serif"
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'week',
+                                        tooltipFormat: 'MMM d, yyyy'
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Future Date',
+                                        font: {
+                                            family: "'Outfit', sans-serif",
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Predicted Price',
+                                        font: {
+                                            family: "'Outfit', sans-serif",
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + value.toLocaleString();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
