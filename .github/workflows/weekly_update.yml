@@ -1,0 +1,58 @@
+name: Weekly Data Update & Retraining
+
+on:
+  schedule:
+    # Run every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions UI tab
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.4.1'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
+      - name: Cache R packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-libs-${{ hashFiles('**/main-r-script.R', '**/cleaning-step.R', '**/model-prediction.R') }}
+          restore-keys: |
+            ${{ runner.os }}-r-libs-
+
+      - name: Install R packages
+        run: |
+          Rscript -e "install.packages(c('tidyverse', 'httr', 'jsonlite', 'dplyr', 'lubridate', 'readr', 'tidyr', 'recipes', 'workflows', 'parsnip', 'ranger', 'yardstick', 'rsample', 'dials', 'tune', 'workflowsets', 'broom', 'tailor', 'patchwork'), repos='https://cloud.r-project.org')"
+
+      - name: Run Data Collection Script
+        env:
+          MARKETCHECK_API_KEY: ${{ secrets.MARKETCHECK_API_KEY }}
+        run: Rscript main-r-script.R
+
+      - name: Run VIN Decoder Script
+        run: Rscript decode-vins.R
+
+      - name: Run Data Cleaning Step
+        run: Rscript cleaning-step.R
+
+      - name: Run Model Prediction & Retraining
+        run: Rscript model-prediction.R
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add car_sales_past90days_FINAL.csv car_sales_predictions_90days.csv model_metrics.csv future_forecast.png eda_plot1.png eda_plot2.png eda_plot3.png eda_plot4.png eda_boxcox_check.png car_price_models_per_tier.rds
+          git commit -m "Automated weekly update: new data fetched and models retrained [skip ci]" || echo "No changes to commit"
+          git push
