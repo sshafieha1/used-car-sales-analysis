@@ -1,8 +1,3 @@
-install.packages("httr")
-install.packages("jsonlite")
-install.packages("dplyr")
-install.packages("lubridate")
-
 library(httr)
 library(jsonlite)
 library(dplyr)
