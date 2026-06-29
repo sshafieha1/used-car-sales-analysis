@@ -67,6 +67,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add car_sales_past90days_FINAL.csv car_sales_predictions_90days.csv model_metrics.csv future_forecast.png eda_plot1.png eda_plot2.png eda_plot3.png eda_plot4.png eda_boxcox_check.png car_price_models_per_tier.rds
+          git add car_sales_past90days_FINAL.csv car_sales_predictions_90days.csv model_metrics.csv future_forecast.png eda_plot1.png eda_plot2.png eda_plot3.png eda_plot4.png eda_boxcox_check.png
+          git add -f car_price_models_per_tier.rds
           git commit -m "Automated weekly update: new data fetched and models retrained [skip ci]" || echo "No changes to commit"
           git push
