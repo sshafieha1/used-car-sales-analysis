@@ -1,9 +1,3 @@
-install.packages("tidyverse")
-install.packages("tidymodels")
-install.packages("lubridate")
-install.packages("ggplot2")
-install.packages("patchwork")
-install.packages("scales")
 
 library(tidyverse)
 library(tidymodels)

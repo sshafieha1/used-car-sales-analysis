@@ -1,7 +1,3 @@
-install.packages("httr")
-install.packages("jsonlite")
-install.packages("dplyr")
-install.packages("readr")
 
 library(httr)
 library(jsonlite)
