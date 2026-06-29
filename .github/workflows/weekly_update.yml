@@ -21,7 +21,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libuv1-dev libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
 
       - name: Cache R packages
         uses: actions/cache@v4
@@ -32,8 +32,22 @@ jobs:
             ${{ runner.os }}-r-libs-
 
       - name: Install R packages
+        env:
+          USE_BUNDLED_LIBUV: 1
         run: |
-          Rscript -e "install.packages(c('tidyverse', 'httr', 'jsonlite', 'dplyr', 'lubridate', 'readr', 'tidyr', 'recipes', 'workflows', 'parsnip', 'ranger', 'yardstick', 'rsample', 'dials', 'tune', 'workflowsets', 'broom', 'tailor', 'patchwork'), repos='https://cloud.r-project.org')"
+          Rscript -e "
+            options(repos = c(
+              RSPM = 'https://packagemanager.posit.co/cran/__linux__/noble/latest',
+              CRAN = 'https://cloud.r-project.org'
+            ))
+            pkgs <- c(
+              'tidyverse', 'tidymodels', 'httr', 'jsonlite', 'dplyr', 'lubridate',
+              'readr', 'tidyr', 'recipes', 'workflows', 'parsnip', 'ranger',
+              'yardstick', 'rsample', 'dials', 'tune', 'workflowsets', 'broom',
+              'tailor', 'patchwork', 'scales'
+            )
+            install.packages(pkgs)
+          "
 
       - name: Run Data Collection Script
         env:
