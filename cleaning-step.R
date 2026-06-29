@@ -1,3 +1,9 @@
+install.packages("tidyverse")
+install.packages("dplyr")
+install.packages("tidyr")
+install.packages("tidymodels")
+install.packages("ggplot2")
+
 library(tidyverse)
 library(dplyr)
 library(tidyr)
